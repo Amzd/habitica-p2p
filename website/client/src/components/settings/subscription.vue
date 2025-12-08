@@ -189,6 +189,7 @@
             >
             </p>
             <div
+              v-if="paymentMethodLogo.icon"
               class="svg svg-icon mb-4"
               :class="paymentMethodLogo.class"
               v-html="paymentMethodLogo.icon"
@@ -207,6 +208,7 @@
             </div>
             <div
               v-once
+              v-if="!hasGroupPlan"
               class="small text-center mb-4"
             >
               {{ $t('subscriptionBillingFYIShort') }}
