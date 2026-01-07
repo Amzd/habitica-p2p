@@ -346,7 +346,8 @@
       <div class="text-center">
         <button
           class="btn btn-info w-100"
-          :disabled="!password || !passwordConfirm || password !== passwordConfirm || resetPasswordSetNewOneData.hasError"
+          :disabled="!password || !passwordConfirm
+            || password !== passwordConfirm || resetPasswordSetNewOneData.hasError"
           @click="resetPasswordSetNewOneLink()"
         >
           {{ $t('setNewPass') }}
