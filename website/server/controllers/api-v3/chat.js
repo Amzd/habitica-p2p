@@ -234,27 +234,6 @@ api.postChat = {
 
     await Promise.all(toSave);
 
-    const analyticsObject = {
-      user: pick(user, ['preferences', 'registeredThrough']),
-      uuid: user._id,
-      hitType: 'event',
-      category: 'behavior',
-      groupType: group.type,
-      privacy: group.privacy,
-      headers: req.headers,
-    };
-
-    if (mentions) {
-      analyticsObject.mentionsCount = mentions.length;
-    } else {
-      analyticsObject.mentionsCount = 0;
-    }
-    if (group.privacy === 'public') {
-      analyticsObject.groupName = group.name;
-    }
-
-    res.analytics.track('group chat', analyticsObject);
-
     if (chatUpdated) {
       res.respond(200, { chat: chatRes.chat });
     } else {

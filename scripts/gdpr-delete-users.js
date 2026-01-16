@@ -3,35 +3,8 @@ import axios from 'axios'; // eslint-disable-line import/no-extraneous-dependenc
 import nconf from 'nconf';
 import { model as User } from '../website/server/models/user';
 
-const AMPLITUDE_KEY = nconf.get('AMPLITUDE_KEY');
-const AMPLITUDE_SECRET = nconf.get('AMPLITUDE_SECRET');
 const BASE_URL = nconf.get('BASE_URL');
 
-async function deleteAmplitudeData (userId, email) {
-  const response = await axios.post(
-    'https://amplitude.com/api/2/deletions/users',
-    {
-      user_ids: userId, // eslint-disable-line camelcase
-      requester: email,
-    },
-    {
-      auth: {
-        username: AMPLITUDE_KEY,
-        password: AMPLITUDE_SECRET,
-      },
-    },
-  ).catch(err => {
-    console.log(err.response.data);
-  });
-
-  if (response) {
-    if (response.status === 200) {
-      console.log(`${userId} (${email}) Amplitude deletion request OK.`);
-    } else {
-      console.log(`${userId} (${email}) Amplitude response: ${response.status} ${response.statusText}`);
-    }
-  }
-}
 
 async function deleteHabiticaData (user, email) {
   const set = {
@@ -99,7 +72,6 @@ async function processEmailAddress (email) {
   // eslint-disable-next-line no-promise-executor-return
   await new Promise(resolve => setTimeout(resolve, 1000));
   return Promise.all(users.map(user => (async () => {
-    await deleteAmplitudeData(user._id, email); // eslint-disable-line no-await-in-loop
     await deleteHabiticaData(user, email); // eslint-disable-line no-await-in-loop
   })()));
 }

@@ -100,18 +100,8 @@ function processHabits (user, habits, now, daysMissed) {
   });
 }
 
-function trackCronAnalytics (analytics, user, _progress, options) {
-  analytics.track('Cron', {
-    category: 'behavior',
-    uuid: user._id,
-    user: pick(user, ['preferences', 'registeredThrough']),
-    resting: user.preferences.sleep,
-    cronCount: user.flags.cronCount,
-    progressUp: Math.min(_progress.up, 900),
-    progressDown: _progress.down,
-    headers: options.headers,
-    loginIncentives: user.loginIncentives,
-  });
+function trackCronAnalytics (user, _progress, options) {
+  // Removed analytics tracking
 }
 
 function awardLoginIncentives (user) {
@@ -165,7 +155,7 @@ function awardLoginIncentives (user) {
 // Perform various beginning-of-day reset actions.
 export async function cron (options = {}) {
   const {
-    user, tasksByType, analytics, now = new Date(), daysMissed, timezoneUtcOffsetFromUserPrefs,
+    user, tasksByType, now = new Date(), daysMissed, timezoneUtcOffsetFromUserPrefs,
   } = options;
   let _progress = { down: 0, up: 0, collectedItems: 0 };
 
@@ -394,7 +384,7 @@ export async function cron (options = {}) {
 
   // Analytics
   user.flags.cronCount += 1;
-  trackCronAnalytics(analytics, user, _progress, options);
+  trackCronAnalytics(user, _progress, options);
 
   await UserHistory.beginUserHistoryUpdate(user._id, options.headers)
     .withCron(user.flags.cronCount)
@@ -438,7 +428,6 @@ export async function cronWrapper (req, res) {
   const { user } = res.locals;
   if (!user) return null; // User might not be available when authentication is not mandatory
 
-  const { analytics } = res;
   const now = new Date();
   let session;
 
@@ -488,7 +477,6 @@ export async function cronWrapper (req, res) {
       tasksByType,
       now,
       daysMissed,
-      analytics,
       timezoneUtcOffsetFromUserPrefs,
       headers: req.headers,
     });

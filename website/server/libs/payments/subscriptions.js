@@ -1,12 +1,9 @@
-// TODO these files need to refactored.
-
 import defaults from 'lodash/defaults';
 import each from 'lodash/each';
 import find from 'lodash/find';
 import pick from 'lodash/pick';
 import moment from 'moment';
 
-import { getAnalyticsServiceByEnvironment } from '../analyticsService';
 import * as slack from '../slack'; // eslint-disable-line import/no-cycle
 import { // eslint-disable-line import/no-cycle
   getUserInfo,
@@ -29,7 +26,6 @@ import { addSubscriptionToGroupUsers, cancelGroupUsersSubscription } from './gro
 
 // @TODO: Abstract to shared/constant
 const JOINED_GROUP_PLAN = 'joined group plan';
-const analytics = getAnalyticsServiceByEnvironment();
 
 function _findMysteryItems (user, dateMoment) {
   const pushedItems = [];
@@ -125,13 +121,6 @@ async function prepareSubscriptionValues (data) {
     group = await Group.getGroup({
       user: data.user, groupId: data.groupId, populateLeader: false, groupFields,
     });
-
-    if (group) {
-      analytics.track(
-        data.groupID,
-        data.demographics,
-      );
-    }
 
     if (!group) {
       throw new NotFound(shared.i18n.t('groupNotFound'));
@@ -272,22 +261,6 @@ async function createSubscription (data) {
   }
 
   if (!group && !data.promo) data.user.purchased.txnCount += 1;
-
-  if (!data.promo) {
-    analytics.trackPurchase({
-      uuid: data.user._id,
-      groupId,
-      itemPurchased,
-      sku: `${data.paymentMethod.toLowerCase()}-subscription`,
-      purchaseType,
-      paymentMethod: data.paymentMethod,
-      quantity: 1,
-      gift: Boolean(data.gift),
-      purchaseValue: block.price,
-      headers: data.headers || { 'x-client': 'habitica-web' },
-      firstPurchase: !group && data.user.purchased.txnCount === 1,
-    });
-  }
 
   if (data.gift) {
     const byUserName = getUserInfo(data.user, ['name']).name;
@@ -462,14 +435,6 @@ async function cancelSubscription (data) {
     cancelType = 'group-unsubscribe';
     groupId = group._id;
   }
-
-  analytics.track(cancelType, {
-    uuid: data.user._id,
-    user: pick(data.user, ['preferences', 'registeredThrough']),
-    groupId,
-    paymentMethod: data.paymentMethod,
-    headers: data.headers,
-  });
 }
 
 export {

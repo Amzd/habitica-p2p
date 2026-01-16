@@ -290,18 +290,6 @@ api.createChallenge = {
     };
     response.group = getChallengeGroupResponse(group);
 
-    res.analytics.track('challenge create', {
-      user: pick(user, ['preferences', 'registeredThrough']),
-      uuid: user._id,
-      hitType: 'event',
-      category: 'behavior',
-      challengeID: response._id,
-      groupID: group._id,
-      groupName: group.privacy === 'private' ? null : group.name,
-      groupType: group._id === TAVERN_ID ? 'tavern' : group.type,
-      prize: response.prize,
-      headers: req.headers,
-    });
 
     res.respond(201, response);
   },
@@ -359,17 +347,6 @@ api.joinChallenge = {
     const chalLeader = await User.findById(response.leader).select(nameFields).exec();
     response.leader = chalLeader ? chalLeader.toJSON({ minimize: true }) : null;
 
-    res.analytics.track('challenge join', {
-      user: pick(user, ['preferences', 'registeredThrough']),
-      uuid: user._id,
-      hitType: 'event',
-      category: 'behavior',
-      challengeID: challenge._id,
-      groupID: group._id,
-      groupName: group.privacy === 'private' ? null : group.name,
-      groupType: group._id === TAVERN_ID ? 'tavern' : group.type,
-      headers: req.headers,
-    });
 
     res.respond(200, response);
   },
@@ -410,17 +387,6 @@ api.leaveChallenge = {
     // Unlink challenge's tasks from user's tasks and save the challenge
     await challenge.unlinkTasks(user, keep);
 
-    res.analytics.track('challenge leave', {
-      user: pick(user, ['preferences', 'registeredThrough']),
-      uuid: user._id,
-      hitType: 'event',
-      category: 'behavior',
-      challengeID: challenge._id,
-      groupID: challenge.group._id,
-      groupName: challenge.group.privacy === 'private' ? null : challenge.group.name,
-      groupType: challenge.group._id === TAVERN_ID ? 'tavern' : challenge.group.type,
-      headers: req.headers,
-    });
 
     res.respond(200, {});
   },
@@ -895,18 +861,6 @@ api.deleteChallenge = {
     // Close channel in background, some ops are run in the background without `await`ing
     await challenge.closeChal({ broken: 'CHALLENGE_DELETED' });
 
-    res.analytics.track('challenge delete', {
-      user: pick(user, ['preferences', 'registeredThrough']),
-      uuid: user._id,
-      hitType: 'event',
-      category: 'behavior',
-      challengeID: challenge._id,
-      groupID: challenge.group._id,
-      groupName: challenge.group.privacy === 'private' ? null : challenge.group.name,
-      groupType: challenge.group._id === TAVERN_ID ? 'tavern' : challenge.group.type,
-      prize: challenge.prize,
-      headers: req.headers,
-    });
 
     res.respond(200, {});
   },
@@ -955,20 +909,6 @@ api.selectChallengeWinner = {
 
     // Close channel in background, some ops are run in the background without `await`ing
     await challenge.closeChal({ broken: 'CHALLENGE_CLOSED', winner });
-
-    res.analytics.track('challenge close', {
-      user: pick(user, ['preferences', 'registeredThrough']),
-      uuid: user._id,
-      hitType: 'event',
-      category: 'behavior',
-      challengeID: challenge._id,
-      challengeWinnerID: winner._id,
-      groupID: challenge.group._id,
-      groupName: challenge.group.privacy === 'private' ? null : challenge.group.name,
-      groupType: challenge.group._id === TAVERN_ID ? 'tavern' : challenge.group.type,
-      prize: challenge.prize,
-      headers: req.headers,
-    });
 
     res.respond(200, {});
   },

@@ -156,15 +156,5 @@ export async function loginSocial (req, res) { // eslint-disable-line import/pre
       .catch(err => logger.error(err)); // eslint-disable-line max-nested-callbacks
   }
 
-  if (!existingUser) {
-    res.analytics.track('register', {
-      user: pick(savedUser, ['preferences', 'registeredThrough']),
-      uuid: savedUser._id,
-      category: 'acquisition',
-      type: network,
-      headers: req.headers,
-    });
-  }
-
   return response;
 }

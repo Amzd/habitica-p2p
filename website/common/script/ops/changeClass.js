@@ -34,7 +34,7 @@ async function resetClass (user, req = {}) {
   return balanceRemoved;
 }
 
-export default async function changeClass (user, req = {}, analytics) {
+export default async function changeClass (user, req = {}) {
   const klass = get(req, 'query.class');
   let balanceRemoved = 0;
   // user.flags.classSelected is set to false after the user paid the 3 gems
@@ -68,16 +68,6 @@ export default async function changeClass (user, req = {}, analytics) {
 
     removePinnedItemsByOwnedGear(user);
 
-    if (analytics) {
-      analytics.track('change class', {
-        user: pick(user, ['preferences', 'registeredThrough']),
-        uuid: user._id,
-        class: klass,
-        currency: balanceRemoved === 0 ? 'Free' : 'Gems',
-        category: 'behavior',
-        headers: req.headers,
-      });
-    }
   } else {
     // if invalid class is specified, throw an error.
     throw new BadRequest(i18n.t('invalidClass', req.language));

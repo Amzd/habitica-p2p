@@ -655,7 +655,6 @@ export const UserSchema = new Schema({
         return isValidCategory;
       },
     },
-    analyticsConsent: Boolean,
   },
   profile: {
     blurb: String,

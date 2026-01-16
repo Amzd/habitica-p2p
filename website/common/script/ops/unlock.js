@@ -208,7 +208,7 @@ function buildResponse ({ purchased, preference, items }, ownsAlready, language)
 // If item is already purchased -> equip it
 // Otherwise unlock it
 // @TODO refactor and take as parameter the set name, for single items use the buy ops
-export default async function unlock (user, req = {}, analytics) {
+export default async function unlock (user, req = {}) {
   const path = get(req.query, 'path');
 
   if (!path) {
@@ -315,19 +315,6 @@ export default async function unlock (user, req = {}, analytics) {
 
   if (!unlockedAlready) {
     await updateUserBalance(user, -cost, 'spend', path);
-
-    if (analytics) {
-      analytics.track('buy', {
-        user: pick(user, ['preferences', 'registeredThrough']),
-        uuid: user._id,
-        itemKey: path,
-        itemType: 'customization',
-        currency: 'Gems',
-        gemCost: cost / 0.25,
-        category: 'behavior',
-        headers: req.headers,
-      });
-    }
   }
 
   return buildResponse(user, unlockedAlready, req.language);
