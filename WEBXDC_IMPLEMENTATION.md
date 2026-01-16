@@ -9,11 +9,13 @@ This implementation converts Habitica into a peer-to-peer application that can r
 ### New Dependencies
 - **yjs**: CRDT library for conflict-free data synchronization
 - **y-indexeddb**: IndexedDB persistence provider for Yjs
+- **y-webxdc**: Official Yjs bindings for webxdc apps
+- **js-base64**: Base64 encoding/decoding for y-webxdc
 
 ### New Files Created
 ```
 website/client/src/localBackend/
-├── sync.js           # Yjs document and webxdc sync management
+├── sync.js           # Yjs document and webxdc sync management using y-webxdc
 ├── tasks.js          # Local task operations (CRUD + game mechanics)
 ├── user.js           # Local user data management
 ├── webxdc.d.ts       # TypeScript definitions for webxdc API
@@ -23,8 +25,7 @@ website/client/src/localBackend/
 ### Modified Files
 - `website/client/src/store/actions/tasks.js` - Routes task operations to localBackend in webxdc
 - `website/client/src/store/actions/user.js` - Routes user operations to localBackend in webxdc
-- `website/client/src/libs/asyncResource.js` - Supports null URLs for local operations
-- `website/client/package.json` - Added yjs dependencies
+- `website/client/package.json` - Added yjs and y-webxdc dependencies
 
 ## How It Works
 
@@ -50,9 +51,10 @@ User Action → Store Action → LocalBackend → Yjs Document → IndexedDB
 ### Synchronization
 1. All data is stored in a Yjs document (CRDT)
 2. Changes are persisted to IndexedDB immediately
-3. Updates are broadcast to peers via webxdc API
-4. Peers apply updates to their local Yjs document
-5. Conflicts are automatically resolved by CRDT properties
+3. y-webxdc provider automatically batches and sends updates every 5 seconds
+4. Updates are broadcast to peers via webxdc API
+5. Peers receive updates and apply them to their local Yjs document
+6. Conflicts are automatically resolved by CRDT properties
 
 ## Features Supported
 

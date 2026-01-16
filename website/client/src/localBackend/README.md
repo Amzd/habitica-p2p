@@ -4,7 +4,7 @@ This directory contains the local backend implementation for Habitica to support
 
 ## Overview
 
-The local backend uses [Yjs](https://github.com/yjs/yjs) for CRDT-based data synchronization and IndexedDB for local persistence. When running in a webxdc environment, updates are automatically synchronized between peers.
+The local backend uses [Yjs](https://github.com/yjs/yjs) for CRDT-based data synchronization and IndexedDB for local persistence. When running in a webxdc environment, updates are automatically synchronized between peers using [y-webxdc](https://www.npmjs.com/package/y-webxdc).
 
 ## Architecture
 
@@ -13,8 +13,8 @@ The local backend uses [Yjs](https://github.com/yjs/yjs) for CRDT-based data syn
 - **sync.js**: Manages the Yjs document and synchronization
   - Creates and maintains a Yjs document
   - Handles IndexedDB persistence via y-indexeddb
-  - Manages webxdc update listeners for peer-to-peer sync
-  - Broadcasts local changes to other peers
+  - Uses y-webxdc provider for automatic peer-to-peer sync
+  - Auto-saves changes every 5 seconds
 
 - **tasks.js**: Local task management
   - CRUD operations for tasks (create, read, update, delete)

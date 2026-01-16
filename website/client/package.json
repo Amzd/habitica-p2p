@@ -31,6 +31,7 @@
     "hellojs": "^1.20.0",
     "intro.js": "^7.2.0",
     "jquery": "^3.7.1",
+    "js-base64": "^3.7.8",
     "lodash": "^4.17.21",
     "markdown-it": "^14.0.0",
     "moment": "^2.29.4",
@@ -50,6 +51,7 @@
     "vuedraggable": "^2.24.3",
     "vuejs-datepicker": "git://github.com/habitrpg/vuejs-datepicker.git#153d339e4dbebb73733658aeda1d5b7fcc55b0a0",
     "y-indexeddb": "^9.0.12",
+    "y-webxdc": "^1.2.0",
     "yjs": "^13.6.29"
   },
   "devDependencies": {

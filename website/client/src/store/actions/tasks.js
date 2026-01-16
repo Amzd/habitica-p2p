@@ -11,20 +11,26 @@ import * as localBackend from '@/localBackend/tasks';
 export function fetchUserTasks (store, options = {}) {
   // Use localBackend in webxdc environment
   if (isWebxdcEnvironment()) {
-    return loadAsyncResource({
-      store,
-      path: 'tasks',
-      url: null, // No URL needed for local backend
-      deserialize: async () => {
-        const tasks = await localBackend.getAllTasks();
-        const userResource = await store.dispatch('user:fetch');
-        if (!userResource || !userResource.data || !userResource.data.tasksOrder) {
-          throw new Error('User data not available');
-        }
-        return store.dispatch('tasks:order', [tasks, userResource.data.tasksOrder]);
-      },
-      forceLoad: options.forceLoad,
-    });
+    // Bypass loadAsyncResource and handle loading directly for localBackend
+    const resource = store.state.tasks;
+
+    if (resource.loadingStatus === 'LOADED' && !options.forceLoad) {
+      return Promise.resolve(resource);
+    }
+
+    resource.loadingStatus = 'LOADING';
+
+    return (async () => {
+      const tasks = await localBackend.getAllTasks();
+      const userResource = await store.dispatch('user:fetch');
+      if (!userResource || !userResource.data || !userResource.data.tasksOrder) {
+        throw new Error('User data not available');
+      }
+      const orderedTasks = await store.dispatch('tasks:order', [tasks, userResource.data.tasksOrder]);
+      resource.data = orderedTasks;
+      resource.loadingStatus = 'LOADED';
+      return resource;
+    })();
   }
 
   return loadAsyncResource({

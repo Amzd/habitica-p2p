@@ -17,7 +17,7 @@ export function loadAsyncResource ({
 }) {
   if (!store) throw new Error('"store" is required and must be the application store.');
   if (!path) throw new Error('The path to the resource in the application state is required.');
-  // url is now optional for local backend
+  if (!url) throw new Error('The resource\'s url on the server is required.');
   if (!deserialize) throw new Error('A response deserialization function named must be passed as "deserialize".');
 
   const resource = get(store.state, path);
@@ -46,10 +46,7 @@ export function loadAsyncResource ({
       });
     });
   } if (loadingStatus === 'NOT_LOADED' || shouldUpdate) { // @TODO set loadingStatus back to LOADING?
-    // If no URL provided (for local backend), call deserialize directly
-    const fetchPromise = url ? axios.get(url) : Promise.resolve(null);
-
-    return fetchPromise.then(response => { // @TODO support more params
+    return axios.get(url).then(response => { // @TODO support more params
       resource.loadingStatus = 'LOADED';
       // deserialize can be a promise
       return Promise.resolve(deserialize(response)).then(deserializedData => {

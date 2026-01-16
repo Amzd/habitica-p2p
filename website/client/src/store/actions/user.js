@@ -15,12 +15,19 @@ import * as localBackendUser from '@/localBackend/user';
 
 export function fetch (store, options = {}) { // eslint-disable-line no-shadow
   if (isWebxdcEnvironment()) {
-    return loadAsyncResource({
-      store,
-      path: 'user',
-      url: null, // No URL needed for local backend
-      deserialize: async () => localBackendUser.getUser(),
-      forceLoad: options.forceLoad,
+    // Bypass loadAsyncResource and handle loading directly for localBackend
+    const resource = store.state.user;
+
+    if (resource.loadingStatus === 'LOADED' && !options.forceLoad) {
+      return Promise.resolve(resource);
+    }
+
+    resource.loadingStatus = 'LOADING';
+
+    return localBackendUser.getUser().then(userData => {
+      resource.data = userData;
+      resource.loadingStatus = 'LOADED';
+      return resource;
     });
   }
 
