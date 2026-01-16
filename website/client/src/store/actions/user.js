@@ -19,13 +19,11 @@ export function fetch (store, options = {}) { // eslint-disable-line no-shadow
       store,
       path: 'user',
       url: null, // No URL needed for local backend
-      deserialize: async () => {
-        return localBackendUser.getUser();
-      },
+      deserialize: async () => localBackendUser.getUser(),
       forceLoad: options.forceLoad,
     });
   }
-  
+
   return loadAsyncResource({
     store,
     path: 'user',

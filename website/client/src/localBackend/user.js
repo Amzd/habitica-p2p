@@ -1,66 +1,13 @@
-import { ensureCreateSyncedYDoc } from './sync';
 import { v4 as uuid } from 'uuid';
-
-/**
- * Get user data from local storage
- */
-export async function getUser() {
-  const ydoc = await ensureCreateSyncedYDoc();
-  const userMap = ydoc.getMap('user');
-  
-  // If user doesn't exist, create default user
-  if (userMap.size === 0) {
-    const defaultUser = createDefaultUser();
-    Object.keys(defaultUser).forEach(key => {
-      userMap.set(key, defaultUser[key]);
-    });
-    return defaultUser;
-  }
-  
-  // Convert Yjs Map to plain object
-  const user = {};
-  userMap.forEach((value, key) => {
-    user[key] = value;
-  });
-  
-  return user;
-}
-
-/**
- * Update user data
- */
-export async function updateUser(updates) {
-  const ydoc = await ensureCreateSyncedYDoc();
-  const userMap = ydoc.getMap('user');
-  
-  Object.keys(updates).forEach(key => {
-    // Handle nested updates (e.g., 'preferences.language')
-    if (key.includes('.')) {
-      const keys = key.split('.');
-      const currentValue = userMap.get(keys[0]) || {};
-      let nested = currentValue;
-      
-      for (let i = 1; i < keys.length - 1; i++) {
-        nested[keys[i]] = nested[keys[i]] || {};
-        nested = nested[keys[i]];
-      }
-      
-      nested[keys[keys.length - 1]] = updates[key];
-      userMap.set(keys[0], currentValue);
-    } else {
-      userMap.set(key, updates[key]);
-    }
-  });
-  
-  return getUser();
-}
+import * as ops from '@/../../common/script/ops';
+import { ensureCreateSyncedYDoc } from './sync';
 
 /**
  * Create a default user object
  */
-function createDefaultUser() {
+function createDefaultUser () {
   const userId = uuid();
-  
+
   return {
     _id: userId,
     stats: {
@@ -140,22 +87,73 @@ function createDefaultUser() {
 }
 
 /**
+ * Get user data from local storage
+ */
+export async function getUser () {
+  const ydoc = await ensureCreateSyncedYDoc();
+  const userMap = ydoc.getMap('user');
+
+  // If user doesn't exist, create default user
+  if (userMap.size === 0) {
+    const defaultUser = createDefaultUser();
+    Object.keys(defaultUser).forEach(key => {
+      userMap.set(key, defaultUser[key]);
+    });
+    return defaultUser;
+  }
+
+  // Convert Yjs Map to plain object
+  const user = {};
+  userMap.forEach((value, key) => {
+    user[key] = value;
+  });
+
+  return user;
+}
+
+/**
+ * Update user data
+ */
+export async function updateUser (updates) {
+  const ydoc = await ensureCreateSyncedYDoc();
+  const userMap = ydoc.getMap('user');
+
+  Object.keys(updates).forEach(key => {
+    // Handle nested updates (e.g., 'preferences.language')
+    if (key.includes('.')) {
+      const keys = key.split('.');
+      const currentValue = userMap.get(keys[0]) || {};
+      let nested = currentValue;
+
+      for (let i = 1; i < keys.length - 1; i += 1) {
+        nested[keys[i]] = nested[keys[i]] || {};
+        nested = nested[keys[i]];
+      }
+
+      nested[keys[keys.length - 1]] = updates[key];
+      userMap.set(keys[0], currentValue);
+    } else {
+      userMap.set(key, updates[key]);
+    }
+  });
+
+  return getUser();
+}
+
+/**
  * Apply server-side operations locally (replicate server effects)
  */
-export async function applyUserOperation(operation, params) {
+export async function applyUserOperation (operation, params) {
   const user = await getUser();
-  
-  // Import the operation from common script
-  const ops = require('@/../../common/script/ops');
-  
+
   if (ops[operation]) {
     const result = ops[operation](user, params);
-    
+
     // Update the user in local storage
     await updateUser(user);
-    
+
     return result;
   }
-  
+
   throw new Error(`Unknown operation: ${operation}`);
 }

@@ -4,11 +4,11 @@ import { IndexeddbPersistence } from 'y-indexeddb';
 /**
  * @returns resolves when all the pending updates have been applied
  */
-function initWebxdcSyncProvider(ydoc) {
+function initWebxdcSyncProvider (ydoc) {
   const lastAppliedWebxdcUpdateSerialNum = 0;
 
   const setListenerP = window.webxdc.setUpdateListener(
-    (update) => {
+    update => {
       console.log('Received webxdc update', update.serial);
       // Apply the update to the Yjs document
       Y.applyUpdate(ydoc, new Uint8Array(update.payload.update), 'webxdcUpdateHandler');
@@ -38,7 +38,7 @@ function initWebxdcSyncProvider(ydoc) {
   return setListenerP;
 }
 
-async function createSyncedYDoc() {
+async function createSyncedYDoc () {
   const ydoc = new Y.Doc();
 
   // Initialize IndexedDB persistence
@@ -61,6 +61,4 @@ export const ensureCreateSyncedYDoc = () => {
   return _ydoc;
 };
 
-export const isWebxdcEnvironment = () => {
-  return typeof window !== 'undefined' && window.webxdc;
-};
+export const isWebxdcEnvironment = () => typeof window !== 'undefined' && window.webxdc;

@@ -23,7 +23,7 @@ export function fetchUserTasks (store, options = {}) {
       forceLoad: options.forceLoad,
     });
   }
-  
+
   return loadAsyncResource({
     store,
     path: 'tasks',
@@ -63,7 +63,7 @@ export async function clearCompletedTodos (store) {
     store.state.tasks.data.todos = store.state.tasks.data.todos.filter(task => !task.completed);
     return;
   }
-  
+
   await axios.post('/api/v4/tasks/clearCompletedTodos');
   store.state.tasks.data.todos = store.state.tasks.data.todos.filter(task => !task.completed);
 }
@@ -116,18 +116,20 @@ export async function create (store, createdTask) {
 
   if (isWebxdcEnvironment()) {
     // Use local backend
-    for (const t of payload) {
+    const user = store.state.user.data;
+    const taskPromises = payload.map(async t => {
       const type = `${t.type}s`;
       const list = store.state.tasks.data[type];
-      
+
       sanitizeChecklist(t);
-      
-      const user = store.state.user.data;
+
       const newTask = await localBackend.createTask(t, user);
-      
+
       list.unshift(newTask);
       store.state.user.data.tasksOrder[type].unshift(newTask._id);
-    }
+      return newTask;
+    });
+    await Promise.all(taskPromises);
     return;
   }
 
@@ -195,7 +197,7 @@ export async function score (store, { taskId, direction }) {
     const result = await localBackend.scoreTask(taskId, direction, user);
     return { data: result };
   }
-  
+
   const res = await axios.post(`/api/v4/tasks/${taskId}/score/${direction}`);
   return res;
 }
