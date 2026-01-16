@@ -16,10 +16,7 @@
         class="col-12 col-md-3"
       >
         <div class="stats-card">
-          <div
-            class="card-header"
-            :class="stat"
-          >
+          <div class="card-header" :class="stat">
             <span
               class="hint"
               :popover-title="$t(statInfo.title)"
@@ -103,10 +100,7 @@
         >
           <div class="allocation-card">
             <div class="allocation-card-content">
-              <div
-                class="allocation-card-title"
-                :class="stat"
-              >
+              <div class="allocation-card-title" :class="stat">
                 {{ $t(stats[stat].title) }}
               </div>
               <div class="allocation-card-value">
@@ -164,10 +158,7 @@
                 <span class="option-text">
                   {{ $t(item.label) }}
                 </span>
-                <span
-                  v-if="!button && item.description"
-                  class="option-description"
-                >
+                <span v-if="!button && item.description" class="option-description">
                   {{ $t(item.description) }}
                 </span>
               </div>
