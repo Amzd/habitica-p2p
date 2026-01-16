@@ -5,8 +5,25 @@ import omit from 'lodash/omit';
 import { loadAsyncResource } from '@/libs/asyncResource';
 import * as Analytics from '@/libs/analytics';
 import { CONSTANTS, getLocalSetting, setLocalSetting } from '@/libs/userlocalManager';
+import { isWebxdcEnvironment } from '@/localBackend/sync';
+import * as localBackend from '@/localBackend/tasks';
 
 export function fetchUserTasks (store, options = {}) {
+  // Use localBackend in webxdc environment
+  if (isWebxdcEnvironment()) {
+    return loadAsyncResource({
+      store,
+      path: 'tasks',
+      url: null, // No URL needed for local backend
+      deserialize: async () => {
+        const tasks = await localBackend.getAllTasks();
+        const userResource = await store.dispatch('user:fetch');
+        return store.dispatch('tasks:order', [tasks, userResource.data.tasksOrder]);
+      },
+      forceLoad: options.forceLoad,
+    });
+  }
+  
   return loadAsyncResource({
     store,
     path: 'tasks',
@@ -41,6 +58,12 @@ export async function fetchCompletedTodos (store) {
 }
 
 export async function clearCompletedTodos (store) {
+  if (isWebxdcEnvironment()) {
+    await localBackend.clearCompletedTodos();
+    store.state.tasks.data.todos = store.state.tasks.data.todos.filter(task => !task.completed);
+    return;
+  }
+  
   await axios.post('/api/v4/tasks/clearCompletedTodos');
   store.state.tasks.data.todos = store.state.tasks.data.todos.filter(task => !task.completed);
 }
@@ -91,6 +114,23 @@ export async function create (store, createdTask) {
   // Treat all create actions as if we are adding multiple tasks
   const payload = Array.isArray(createdTask) ? createdTask : [createdTask];
 
+  if (isWebxdcEnvironment()) {
+    // Use local backend
+    for (const t of payload) {
+      const type = `${t.type}s`;
+      const list = store.state.tasks.data[type];
+      
+      sanitizeChecklist(t);
+      
+      const user = store.state.user.data;
+      const newTask = await localBackend.createTask(t, user);
+      
+      list.unshift(newTask);
+      store.state.user.data.tasksOrder[type].unshift(newTask._id);
+    }
+    return;
+  }
+
   payload.forEach(t => {
     const type = `${t.type}s`;
     const list = store.state.tasks.data[type];
@@ -139,12 +179,23 @@ export async function save (store, editedTask) {
 
   if (originalTask) Object.assign(originalTask, editedTask);
 
+  if (isWebxdcEnvironment()) {
+    await localBackend.updateTask(taskId, editedTask);
+    return;
+  }
+
   const taskDataToSend = omit(editedTask, ['history']);
   const response = await axios.put(`/api/v4/tasks/${taskId}`, taskDataToSend);
   if (originalTask) Object.assign(originalTask, response.data.data);
 }
 
 export async function score (store, { taskId, direction }) {
+  if (isWebxdcEnvironment()) {
+    const user = store.state.user.data;
+    const result = await localBackend.scoreTask(taskId, direction, user);
+    return { data: result };
+  }
+  
   const res = await axios.post(`/api/v4/tasks/${taskId}/score/${direction}`);
   return res;
 }
@@ -173,6 +224,11 @@ export async function destroy (store, task) {
 
   if (taskIndex > -1) {
     list.splice(taskIndex, 1);
+  }
+
+  if (isWebxdcEnvironment()) {
+    await localBackend.deleteTask(task._id);
+    return;
   }
 
   await axios.delete(`/api/v4/tasks/${task._id}`);

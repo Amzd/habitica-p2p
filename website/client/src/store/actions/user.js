@@ -10,8 +10,22 @@ import { unEquipByType } from '@/../../common/script/ops/unequip';
 import markPMSRead from '@/../../common/script/ops/markPMSRead';
 import updateStats from '@/../../common/script/fns/updateStats';
 import { loadAsyncResource } from '@/libs/asyncResource';
+import { isWebxdcEnvironment } from '@/localBackend/sync';
+import * as localBackendUser from '@/localBackend/user';
 
 export function fetch (store, options = {}) { // eslint-disable-line no-shadow
+  if (isWebxdcEnvironment()) {
+    return loadAsyncResource({
+      store,
+      path: 'user',
+      url: null, // No URL needed for local backend
+      deserialize: async () => {
+        return localBackendUser.getUser();
+      },
+      forceLoad: options.forceLoad,
+    });
+  }
+  
   return loadAsyncResource({
     store,
     path: 'user',
@@ -54,6 +68,11 @@ export async function set (store, changes) {
     } else {
       setProps(user, key, changes[key]);
     }
+  }
+
+  if (isWebxdcEnvironment()) {
+    await localBackendUser.updateUser(changes);
+    return user;
   }
 
   const response = await axios.put('/api/v4/user', changes);
