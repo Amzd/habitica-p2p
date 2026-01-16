@@ -3,7 +3,6 @@ import moment from 'moment';
 import * as sender from '../../../../../website/server/libs/email';
 import common from '../../../../../website/common';
 import api from '../../../../../website/server/libs/payments/payments';
-import * as analytics from '../../../../../website/server/libs/analyticsService';
 import * as notifications from '../../../../../website/server/libs/pushNotifications';
 import { model as User } from '../../../../../website/server/models/user';
 import { translate as t } from '../../../../helpers/api-integration/v3';
@@ -36,8 +35,6 @@ describe('payments/index', () => {
 
     sandbox.stub(sender, 'sendTxn');
     sandbox.stub(user, 'sendMessage');
-    sandbox.stub(analytics.mockAnalyticsService, 'trackPurchase');
-    sandbox.stub(analytics.mockAnalyticsService, 'track');
     sandbox.stub(notifications, 'sendNotification');
 
     data = {
@@ -298,27 +295,7 @@ describe('payments/index', () => {
         expect(notifications.sendNotification).to.be.calledOnce;
       });
 
-      it('tracks subscription purchase as gift', async () => {
-        await api.createSubscription(data);
 
-        expect(analytics.mockAnalyticsService.trackPurchase).to.be.calledOnce;
-        expect(analytics.mockAnalyticsService.trackPurchase).to.be.calledWith({
-          uuid: user._id,
-          groupId: undefined,
-          itemPurchased: 'Subscription',
-          sku: 'payment method-subscription',
-          purchaseType: 'subscribe',
-          paymentMethod: data.paymentMethod,
-          quantity: 1,
-          gift: true,
-          purchaseValue: 15,
-          firstPurchase: true,
-          headers: {
-            'x-client': 'habitica-web',
-            'user-agent': '',
-          },
-        });
-      });
 
       context('No Active Promotion', () => {
         beforeEach(() => {
@@ -543,27 +520,7 @@ describe('payments/index', () => {
         expect(sender.sendTxn).to.be.calledWith(data.user, 'subscription-begins');
       });
 
-      it('tracks subscription purchase', async () => {
-        await api.createSubscription(data);
 
-        expect(analytics.mockAnalyticsService.trackPurchase).to.be.calledOnce;
-        expect(analytics.mockAnalyticsService.trackPurchase).to.be.calledWith({
-          uuid: user._id,
-          groupId: undefined,
-          itemPurchased: 'Subscription',
-          sku: 'payment method-subscription',
-          purchaseType: 'subscribe',
-          paymentMethod: data.paymentMethod,
-          quantity: 1,
-          gift: false,
-          purchaseValue: 15,
-          firstPurchase: true,
-          headers: {
-            'x-client': 'habitica-web',
-            'user-agent': '',
-          },
-        });
-      });
 
       context('Upgrades subscription', () => {
         it('from basic_earned to basic_6mo', async () => {

@@ -130,7 +130,6 @@ import PrivacyBanner from '@/components/header/banners/privacy';
 import AppFooter from '@/components/appFooter';
 import notificationsDisplay from '@/components/notifications';
 import { mapState } from '@/libs/store';
-import * as Analytics from '@/libs/analytics';
 import BuyModal from '@/components/shops/buyModal.vue';
 import SelectMembersModal from '@/components/selectMembersModal.vue';
 import notifications from '@/mixins/notifications';
@@ -286,7 +285,6 @@ export default {
           return null;
         }
       }
-      Analytics.updateUser();
       return axios.get(
         '/api/v4/i18n/browser-script',
         {
