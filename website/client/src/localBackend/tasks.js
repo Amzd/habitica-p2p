@@ -37,7 +37,7 @@ export async function createTask (taskData, user) {
   // Apply default values to the task
   const newTask = taskDefaults(taskData, user);
 
-  // Add to Yjs array
+  // Add to Yjs array (unshift expects individual elements, not arrays)
   tasksArray.unshift([newTask]);
 
   return newTask;

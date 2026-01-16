@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid';
 import * as ops from '@/../../common/script/ops';
-import { ensureCreateSyncedYDoc } from './sync';
+import { ensureCreateSyncedYDoc, isWebxdcEnvironment } from './sync';
 
 /**
  * Create a default user object
@@ -63,7 +63,7 @@ function createDefaultUser () {
       timezoneOffset: new Date().getTimezoneOffset(),
     },
     profile: {
-      name: window.webxdc ? window.webxdc.selfName : 'Player',
+      name: isWebxdcEnvironment() ? window.webxdc.selfName : 'Player',
     },
     tasksOrder: {
       habits: [],
@@ -122,7 +122,8 @@ export async function updateUser (updates) {
     // Handle nested updates (e.g., 'preferences.language')
     if (key.includes('.')) {
       const keys = key.split('.');
-      const currentValue = userMap.get(keys[0]) || {};
+      // Create a deep copy to avoid mutating Yjs data
+      const currentValue = JSON.parse(JSON.stringify(userMap.get(keys[0]) || {}));
       let nested = currentValue;
 
       for (let i = 1; i < keys.length - 1; i += 1) {
@@ -144,13 +145,21 @@ export async function updateUser (updates) {
  * Apply server-side operations locally (replicate server effects)
  */
 export async function applyUserOperation (operation, params) {
+  const ydoc = await ensureCreateSyncedYDoc();
+  const userMap = ydoc.getMap('user');
+
+  // Get the current user data
   const user = await getUser();
 
   if (ops[operation]) {
+    // Apply the operation (modifies user in place)
     const result = ops[operation](user, params);
 
-    // Update the user in local storage
-    await updateUser(user);
+    // Update all top-level keys in the Yjs map
+    // This ensures the CRDT sees the changes
+    Object.keys(user).forEach(key => {
+      userMap.set(key, user[key]);
+    });
 
     return result;
   }

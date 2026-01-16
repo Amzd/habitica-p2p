@@ -5,15 +5,19 @@ import { IndexeddbPersistence } from 'y-indexeddb';
  * @returns resolves when all the pending updates have been applied
  */
 function initWebxdcSyncProvider (ydoc) {
-  const lastAppliedWebxdcUpdateSerialNum = 0;
+  // Get the last applied serial number from localStorage
+  const lastSerial = localStorage.getItem('habitica-webxdc-last-serial');
+  const lastAppliedWebxdcUpdateSerialNum = lastSerial ? parseInt(lastSerial, 10) : 0;
 
   const setListenerP = window.webxdc.setUpdateListener(
     update => {
       console.log('Received webxdc update', update.serial);
       // Apply the update to the Yjs document
       Y.applyUpdate(ydoc, new Uint8Array(update.payload.update), 'webxdcUpdateHandler');
+      // Store the serial number
+      localStorage.setItem('habitica-webxdc-last-serial', update.serial.toString());
     },
-    lastAppliedWebxdcUpdateSerialNum || 0,
+    lastAppliedWebxdcUpdateSerialNum,
   );
 
   // Listen for local changes and broadcast them via webxdc

@@ -18,6 +18,9 @@ export function fetchUserTasks (store, options = {}) {
       deserialize: async () => {
         const tasks = await localBackend.getAllTasks();
         const userResource = await store.dispatch('user:fetch');
+        if (!userResource || !userResource.data || !userResource.data.tasksOrder) {
+          throw new Error('User data not available');
+        }
         return store.dispatch('tasks:order', [tasks, userResource.data.tasksOrder]);
       },
       forceLoad: options.forceLoad,
