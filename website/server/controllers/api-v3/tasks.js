@@ -331,16 +331,7 @@ api.createChallengeTasks = {
     // If adding tasks to a challenge -> sync users
     if (challenge) challenge.addTasks(tasks);
 
-    tasks.forEach(task => {
-      res.analytics.track('challenge task created', {
-        user: pick(user, ['preferences', 'registeredThrough']),
-        uuid: user._id,
-        hitType: 'event',
-        category: 'behavior',
-        taskType: task.type,
-        challengeID: challenge._id,
-      });
-    });
+
   },
 };
 
@@ -701,18 +692,7 @@ api.updateTask = {
       });
     }
 
-    if (group) {
-      res.analytics.track('task edit', {
-        user: pick(user, ['preferences', 'registeredThrough']),
-        uuid: user._id,
-        hitType: 'event',
-        category: 'behavior',
-        taskType: task.type,
-        groupID: group._id,
-      });
-    }
-  },
-};
+
 
 /**
  * @api {post} /api/v3/tasks/:taskId/score/:direction Score a task

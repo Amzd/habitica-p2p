@@ -734,17 +734,6 @@ api.transferGems = {
     }
 
     res.respond(200, {});
-
-    if (res.analytics) {
-      res.analytics.track('transfer gems', {
-        user: pick(sender, ['preferences', 'registeredThrough']),
-        uuid: sender._id,
-        hitType: 'event',
-        category: 'behavior',
-        headers: req.headers,
-        quantity: gemAmount,
-      });
-    }
   },
 };
 

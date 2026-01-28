@@ -127,14 +127,6 @@ api.loginLocal = {
     user.auth.timestamps.updated = new Date();
     await user.save();
 
-    res.analytics.track('login', {
-      user: pick(user, ['preferences', 'registeredThrough']),
-      category: 'behavior',
-      type: 'local',
-      uuid: user._id,
-      headers: req.headers,
-    });
-
     return loginRes(user, req, res);
   },
 };
