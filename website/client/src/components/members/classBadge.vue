@@ -38,10 +38,11 @@
 </style>
 
 <script>
-import warriorIcon from '@/assets/svg/warrior.svg?raw';
-import rogueIcon from '@/assets/svg/rogue.svg?raw';
-import healerIcon from '@/assets/svg/healer.svg?raw';
-import wizardIcon from '@/assets/svg/wizard.svg?raw';
+
+import warriorIcon from '../../assets/svg/warrior.svg?raw';
+import rogueIcon from '../../assets/svg/rogue.svg?raw';
+import healerIcon from '../../assets/svg/healer.svg?raw';
+import wizardIcon from '../../assets/svg/wizard.svg?raw';
 
 export default {
   props: {

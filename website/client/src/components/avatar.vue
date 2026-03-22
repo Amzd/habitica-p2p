@@ -18,10 +18,9 @@
         ></span>
       </template>
       <!-- Buffs that cause visual changes to avatar: Snowman, Ghost, Flower, etc-->
-      <template v-for="(klass, item) in visualBuffs">
+      <template v-for="(klass, item) in visualBuffs" :key="item">
         <span
           v-if="member.stats.buffs[item] && showVisualBuffs"
-          :key="item"
           :class="klass"
         ></span>
       </template>
@@ -43,13 +42,8 @@
         <span :class="[member.preferences.size + '_' + getGearClass('armor'), specialMountClass]"></span>
         <!-- eslint-enable max-len-->
         <span :class="[getGearClass('back_collar'), specialMountClass]"></span>
-        <template
-          v-for="type in ['bangs', 'base', 'mustache', 'beard']"
-        >
-          <span
-            :key="type"
-            :class="[hairClass(type), specialMountClass]"
-          ></span>
+        <template v-for="type in ['bangs', 'base', 'mustache', 'beard']" :key="type">
+          <span :class="[hairClass(type), specialMountClass]"></span>
         </template>
         <span :class="[getGearClass('body'), specialMountClass]"></span>
         <span :class="[getGearClass('eyewear'), specialMountClass]"></span>
@@ -156,10 +150,10 @@
 
 <script>
 import moment from 'moment';
-import { mapState } from '@/libs/store';
+import { mapState } from '../libs/store';
 import foolPet from '../mixins/foolPet';
 
-import ClassBadge from '@/components/members/classBadge';
+import ClassBadge from '../components/members/classBadge.vue';
 
 /**
  * TODO replace avatarOnly with multiple options like
