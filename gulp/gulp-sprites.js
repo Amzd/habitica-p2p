@@ -100,6 +100,11 @@ async function createSpritesStream (name, src) {
 
   stream.add(cssStream);
 
+  const imgStream = spriteData.img
+    .pipe(gulp.dest(IMG_DIST_PATH));
+
+  stream.add(imgStream);
+
   return stream;
 }
 
@@ -109,7 +114,7 @@ gulp.task('sprites:main', async () => {
 });
 
 gulp.task('sprites:clean', done => {
-  clean(`${IMG_DIST_PATH}spritesmith*,${CSS_DIST_PATH}spritesmith*}`, done);
+  clean(`${IMG_DIST_PATH}spritesmith*,${CSS_DIST_PATH}spritesmith*`, done);
 });
 
 gulp.task('sprites:compile', gulp.series('sprites:clean', 'sprites:main', done => done()));
