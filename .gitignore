@@ -49,3 +49,4 @@ webpack.webstorm.config
 mongodb-*.tgz
 /mongodb-data*
 /.nyc_output
+website/client/src/assets/images/sprites/spritesmith-main.png
